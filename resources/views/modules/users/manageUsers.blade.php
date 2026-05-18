@@ -449,9 +449,10 @@
             <label class="form-label">Role</label>
             <select id="modal_role" class="form-select">
               <option value="">All Roles</option>
+              <option value="patient">Patient</option>
+              <option value="doctor">Doctor</option>
               <option value="admin">Admin</option>
-              <option value="hr">HR</option>
-              <option value="employee">Employee</option>
+              <option value="author">Author</option>
             </select>
           </div>
 
@@ -498,6 +499,7 @@
               </button>
               <div class="csv-help mt-3">
                 <div><strong>CSV Format:</strong> name, email, password, role</div>
+                <div class="mt-1 text-muted">The `email` column stays in the file. It can be blank only for doctor rows.</div>
                 <div class="mt-1 text-muted">You can also add: phone_number, alternative_email, alternative_phone_number, whatsapp_number, address</div>
                 <div class="mt-1">First row must contain header. Max file size: 10MB</div>
               </div>
@@ -593,8 +595,9 @@
           </div>
 
           <div class="col-md-6">
-            <label class="form-label">Email <span class="text-danger">*</span></label>
+            <label class="form-label">Email <span class="text-danger" id="userEmailRequiredMark">*</span></label>
             <input type="email" class="form-control" id="userEmail" required maxlength="255" placeholder="john.doe@example.com">
+            <div class="form-text" id="userEmailHelp">Required for patient, admin, and author. Optional only for doctor.</div>
           </div>
 
           <div class="col-md-6">
@@ -606,9 +609,10 @@
             <label class="form-label">Role <span class="text-danger">*</span></label>
             <select class="form-select" id="userRole" required>
               <option value="">Select Role</option>
+              <option value="patient">Patient</option>
+              <option value="doctor">Doctor</option>
               <option value="admin">Admin</option>
-              <option value="hr">HR</option>
-              <option value="employee">Employee</option>
+              <option value="author">Author</option>
             </select>
           </div>
 
@@ -824,6 +828,8 @@ document.addEventListener('DOMContentLoaded', function(){
   const userWhatsAppInput  = document.getElementById('userWhatsApp');
   const userAddressInput   = document.getElementById('userAddress');
   const userImageInput     = document.getElementById('userImage');
+  const userEmailRequiredMark = document.getElementById('userEmailRequiredMark');
+  const userEmailHelp = document.getElementById('userEmailHelp');
   const imagePreview       = document.getElementById('imagePreview');
   const pwSections         = document.querySelectorAll('.js-pw-section');
 
@@ -969,19 +975,21 @@ document.addEventListener('DOMContentLoaded', function(){
     r = r.replace(/[\s-]+/g, '_');
 
     const map = {
+      superadmin: 'admin',
+      super_admin: 'admin',
       administrator: 'admin',
-      human_resources: 'hr',
-      human_resource: 'hr',
-      people_ops: 'hr',
-      recruiter: 'hr',
-      staff: 'employee',
-      team_member: 'employee',
-      associate: 'employee',
-      executive: 'employee',
-      manager: 'employee',
-      supervisor: 'employee',
-      member: 'employee',
-      user: 'employee',
+      student: 'patient',
+      students: 'patient',
+      examiner: 'doctor',
+      academic_counsellor: 'doctor',
+      academiccounsellor: 'doctor',
+      academiccounselor: 'doctor',
+      college_administrator: 'admin',
+      collegeadministrator: 'admin',
+      writer: 'author',
+      physician: 'doctor',
+      dr: 'doctor',
+      doc: 'doctor',
     };
 
     return map[r] || r;
@@ -989,9 +997,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function roleLabel(role){
     const map = {
+      patient: 'Patient',
+      doctor: 'Doctor',
       admin: 'Admin',
-      hr: 'HR',
-      employee: 'Employee',
+      author: 'Author',
     };
     return map[normalizeRoleToken(role)] || (role ? String(role) : '—');
   }
@@ -1022,6 +1031,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function buildFloatingMenuHtml(user){
     const items = [];
+
+    if (user && user.uuid && state.canView){
+      items.push('<button type="button" class="usr-menu-item" data-action="doctor_profile"><i class="fa fa-user-doctor"></i><span>Doctor Profile</span></button>');
+    }
 
     if (state.canAssignPrivileges){
       items.push('<button type="button" class="usr-menu-item" data-action="assign_privilege"><i class="fa fa-key"></i><span>Assign Privilege</span></button>');
@@ -1196,11 +1209,9 @@ document.addEventListener('DOMContentLoaded', function(){
             <td>${avatarHtml(user)}</td>
             <td>
               <div class="fw-semibold">${esc(user.name || '—')}</div>
-              <div class="small text-muted">#${esc(user.id)}</div>
             </td>
             <td>
               <div>${esc(user.email || '—')}</div>
-              <div class="small text-muted">${esc(user.uuid || '')}</div>
             </td>
             <td>${esc(user.phone_number || '—')}</td>
             <td><span class="badge-role">${esc(roleLabel(user.role))}</span></td>
@@ -1299,6 +1310,21 @@ document.addEventListener('DOMContentLoaded', function(){
     imagePreview.removeAttribute('src');
     userImageInput.value = '';
     pwSections.forEach(el => el.style.display = '');
+    syncUserEmailRequirement();
+  }
+
+  function syncUserEmailRequirement(){
+    const role = normalizeRoleToken(userRoleInput.value || '');
+    const isDoctor = role === 'doctor';
+    userEmailInput.required = !isDoctor;
+    if (userEmailRequiredMark){
+      userEmailRequiredMark.style.visibility = isDoctor ? 'hidden' : 'visible';
+    }
+    if (userEmailHelp){
+      userEmailHelp.textContent = isDoctor
+        ? 'Optional for doctor accounts.'
+        : 'Required for this role.';
+    }
   }
 
   function openCreateModal(){
@@ -1329,6 +1355,7 @@ document.addEventListener('DOMContentLoaded', function(){
       userAltPhoneInput.value = user.alternative_phone_number || '';
       userWhatsAppInput.value = user.whatsapp_number || '';
       userAddressInput.value = user.address || '';
+      syncUserEmailRequirement();
 
       if (user.image){
         imagePreview.src = user.image;
@@ -1525,8 +1552,8 @@ document.addEventListener('DOMContentLoaded', function(){
   function downloadCsvTemplate(){
     const content = [
       'name,email,password,role,phone_number,alternative_email,alternative_phone_number,whatsapp_number,address',
-      'Aarav Sen,aarav@example.com,Employee@123,employee,,9876543210,,,,Kolkata',
-      'Riya Sharma,riya@example.com,HrTeam@123,hr,,9123456780,,,,Mumbai',
+      'John Doe,john@example.com,Patient@123,patient,,9876543210,,,,Kolkata',
+      'Dr Smith,,Doctor@123,doctor,,9123456780,,,,Mumbai',
     ].join('\n');
 
     const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
@@ -1546,9 +1573,16 @@ document.addEventListener('DOMContentLoaded', function(){
     const id = userIdInput.value.trim();
     const isEdit = !!id;
     const fd = new FormData();
+    const emailValue = userEmailInput.value.trim();
+    const roleValue = normalizeRoleToken(userRoleInput.value || '');
+
+    if (roleValue !== 'doctor' && !emailValue){
+      userEmailInput.focus();
+      return err('Email is required for this role');
+    }
 
     fd.append('name', userNameInput.value.trim());
-    fd.append('email', userEmailInput.value.trim());
+    fd.append('email', emailValue);
     if (userPhoneInput.value.trim()) fd.append('phone_number', userPhoneInput.value.trim());
     if (userAltEmailInput.value.trim()) fd.append('alternative_email', userAltEmailInput.value.trim());
     if (userAltPhoneInput.value.trim()) fd.append('alternative_phone_number', userAltPhoneInput.value.trim());
@@ -1721,6 +1755,8 @@ document.addEventListener('DOMContentLoaded', function(){
       render();
     }, 250));
 
+    userRoleInput.addEventListener('change', syncUserEmailRequirement);
+
     btnApplyFilters.addEventListener('click', () => {
       state.filters.status = modalStatus.value || 'all';
       state.filters.role = modalRole.value || '';
@@ -1848,6 +1884,11 @@ document.addEventListener('DOMContentLoaded', function(){
         if (userUuid) query.set('user_uuid', userUuid);
         if (userId) query.set('user_id', userId);
         window.location.href = '/user-privileges/manage?' + query.toString();
+        return;
+      }
+
+      if (action === 'doctor_profile'){
+        window.location.href = '/doctor/profile/' + encodeURIComponent(userUuid || userId);
         return;
       }
 

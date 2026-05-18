@@ -21,13 +21,14 @@ class UserController extends Controller
     private const USER_TYPE = 'App\\Models\\User';
 
     /** Canonical roles */
-    private const ROLES = ['admin', 'hr', 'employee'];
+    private const ROLES = ['patient', 'doctor', 'admin', 'author'];
 
     /** Short codes for roles */
     private const ROLE_SHORT = [
-        'admin'    => 'ADM',
-        'hr'       => 'HR',
-        'employee' => 'EMP',
+        'patient' => 'PAT',
+        'doctor'  => 'DOC',
+        'admin'   => 'ADM',
+        'author'  => 'AUT',
     ];
 
     /* =========================================================
@@ -227,22 +228,33 @@ class UserController extends Controller
     }
 
     /**
-     * POST /api/auth/register
+     * POST /api/auth/patient-register
      */
-    public function register(Request $request)
+    public function patientRegister(Request $request)
     {
-        return $this->registerEmployee($request);
+        return $this->registerPatient($request);
     }
 
-    protected function registerEmployee(Request $request)
+    /**
+     * Backward-compatible alias if old routes still call studentRegister.
+     */
+    public function studentRegister(Request $request)
     {
-        Log::info('[Register] begin', ['ip' => $request->ip()]);
+        return $this->registerPatient($request);
+    }
+
+    protected function registerPatient(Request $request)
+    {
+        Log::info('[Patient Register] begin', ['ip' => $request->ip()]);
 
         $rules = [
             'name'         => 'required|string|max:255',
             'email'        => 'required|email|max:255',
             'phone_number' => 'required|string|max:32',
             'source'       => 'nullable|string|max:100',
+            'doctor_slug'  => 'nullable|string|max:190',
+            'doctor_uuid'  => 'nullable|string|max:64',
+            'doctor_name'  => 'nullable|string|max:255',
         ];
 
         if ($request->filled('password') || $request->filled('password_confirmation')) {
@@ -257,8 +269,8 @@ class UserController extends Controller
         if ($v->fails()) {
             $this->logActivity(
                 activity: 'store_failed',
-                title: 'Registration failed - validation error',
-                description: 'Account registration failed due to validation errors.',
+                title: 'Patient registration failed - validation error',
+                description: 'Patient registration failed due to validation errors.',
                 performedBy: 0,
                 performedByName: null,
                 targetId: null,
@@ -268,7 +280,7 @@ class UserController extends Controller
                     'phone_number' => $request->input('phone_number'),
                     'errors'       => $v->errors()->toArray(),
                     'reason'       => 'validation_error',
-                    'role'         => 'employee',
+                    'role'         => 'patient',
                 ],
                 request: $request
             );
@@ -301,20 +313,30 @@ class UserController extends Controller
         } while (DB::table('users')->where('uuid', $uuid)->exists());
 
         $name = trim((string) $data['name']);
-        $base = Str::slug($name ?: 'employee');
+        $base = Str::slug($name ?: 'patient');
 
         do {
             $slug = $base . '-' . Str::lower(Str::random(24));
         } while (DB::table('users')->where('slug', $slug)->exists());
 
-        [$role, $roleShort] = $this->normalizeRole($data['role'] ?? 'employee', null);
+        [$role, $roleShort] = $this->normalizeRole('patient', null);
 
         $now = now();
         $metadata = [
             'timezone' => 'Asia/Kolkata',
-            'source'   => (string) ($data['source'] ?? 'employee_register_api'),
+            'source'   => (string) ($data['source'] ?? 'patient_register_api'),
         ];
-        $successMessage = 'Account created successfully';
+        $successMessage = Str::contains((string) $metadata['source'], ['auth_register', 'account_register'])
+            ? 'Account created successfully'
+            : 'Patient registered successfully';
+
+        if (!empty($data['doctor_slug']) || !empty($data['doctor_uuid']) || !empty($data['doctor_name'])) {
+            $metadata['booking_context'] = array_filter([
+                'doctor_slug' => (string) ($data['doctor_slug'] ?? ''),
+                'doctor_uuid' => (string) ($data['doctor_uuid'] ?? ''),
+                'doctor_name' => (string) ($data['doctor_name'] ?? ''),
+            ], fn ($value) => $value !== '');
+        }
 
         try {
             DB::table('users')->insert([
@@ -341,8 +363,8 @@ class UserController extends Controller
 
             $this->logActivity(
                 activity: 'store',
-                title: 'Registration successful',
-                description: 'A new account was registered successfully.',
+                title: 'Patient registration successful',
+                description: 'A new patient account was registered successfully.',
                 performedBy: (int) $user->id,
                 performedByName: $user->name ?? null,
                 targetId: $user->id,
@@ -358,10 +380,10 @@ class UserController extends Controller
             );
 
             $this->notifyAdmins(
-                'Employee account registered',
+                'Patient registered',
                 ($user->name ?? $name) . ' registered successfully.',
                 [
-                    'action' => 'employee_registered',
+                    'action' => 'patient_registered',
                     'module' => 'users',
                     'user'   => [
                         'id'    => (int) $user->id,
@@ -384,11 +406,11 @@ class UserController extends Controller
                 'user'         => $this->publicUserPayload($user),
             ], 201);
         } catch (\Throwable $e) {
-            Log::error('[Register] failed', ['error' => $e->getMessage()]);
+            Log::error('[Patient Register] failed', ['error' => $e->getMessage()]);
 
             return response()->json([
                 'status'  => 'error',
-                'message' => 'Account registration failed',
+                'message' => 'Patient registration failed',
             ], 500);
         }
     }
@@ -541,7 +563,7 @@ class UserController extends Controller
 
         $v = Validator::make($request->all(), [
             'name'                     => 'required|string|max:150',
-            'email'                    => 'required|email|max:255',
+            'email'                    => 'sometimes|nullable|email|max:255',
             'password'                 => 'required|string|min:8',
             'phone_number'             => 'sometimes|nullable|string|max:32',
             'alternative_email'        => 'sometimes|nullable|email|max:255',
@@ -559,8 +581,17 @@ class UserController extends Controller
         }
 
         $data = $v->validated();
+        [$role, $roleShort] = $this->normalizeRole(
+            $data['role'] ?? 'patient',
+            $data['role_short_form'] ?? null
+        );
+        $email = $this->normalizedOptionalEmail($data['email'] ?? null);
 
-        if (DB::table('users')->where('email', $data['email'])->whereNull('deleted_at')->exists()) {
+        if (!$this->roleAllowsMissingEmail($role) && $email === null) {
+            return response()->json(['status' => 'error', 'message' => 'Email is required for this role'], 422);
+        }
+
+        if ($email !== null && DB::table('users')->where('email', $email)->whereNull('deleted_at')->exists()) {
             return response()->json(['status' => 'error', 'message' => 'Email already exists'], 422);
         }
 
@@ -578,11 +609,6 @@ class UserController extends Controller
             $slug = $base . '-' . Str::lower(Str::random(24));
         } while (DB::table('users')->where('slug', $slug)->exists());
 
-        [$role, $roleShort] = $this->normalizeRole(
-            $data['role'] ?? 'employee',
-            $data['role_short_form'] ?? null
-        );
-
         $imageUrl = null;
         if ($request->hasFile('image')) {
             $imageUrl = $this->saveProfileImage($request->file('image'));
@@ -599,7 +625,7 @@ class UserController extends Controller
             DB::table('users')->insert([
                 'uuid'                     => $uuid,
                 'name'                     => $data['name'],
-                'email'                    => $data['email'],
+                'email'                    => $email,
                 'phone_number'             => $data['phone_number'] ?? null,
                 'alternative_email'        => $data['alternative_email'] ?? null,
                 'alternative_phone_number' => $data['alternative_phone_number'] ?? null,
@@ -622,7 +648,7 @@ class UserController extends Controller
                 ], JSON_UNESCAPED_UNICODE),
             ]);
 
-            $user = DB::table('users')->where('email', $data['email'])->first();
+            $user = DB::table('users')->where('uuid', $uuid)->first();
 
             $this->logActivity(
                 activity: 'store',
@@ -655,7 +681,7 @@ class UserController extends Controller
                         'id'     => (int) $user->id,
                         'uuid'   => (string) ($user->uuid ?? ''),
                         'name'   => (string) ($user->name ?? $data['name']),
-                        'email'  => (string) ($user->email ?? $data['email']),
+                        'email'  => (string) ($user->email ?? ''),
                         'role'   => (string) ($user->role ?? $role),
                         'status' => (string) ($user->status ?? ($data['status'] ?? 'active')),
                     ],
@@ -959,7 +985,7 @@ class UserController extends Controller
 
         $v = Validator::make($request->all(), [
             'name'                     => 'sometimes|string|max:150',
-            'email'                    => 'sometimes|email|max:255',
+            'email'                    => 'sometimes|nullable|email|max:255',
             'phone_number'             => 'sometimes|nullable|string|max:32',
             'alternative_email'        => 'sometimes|nullable|email|max:255',
             'alternative_phone_number' => 'sometimes|nullable|string|max:32',
@@ -982,9 +1008,20 @@ class UserController extends Controller
             return response()->json(['status' => 'error', 'message' => 'User not found'], 404);
         }
 
-        if (array_key_exists('email', $data)) {
+        [$role] = $this->normalizeRole(
+            $data['role'] ?? ($existing->role ?? 'patient'),
+            $data['role_short_form'] ?? ($existing->role_short_form ?? null)
+        );
+        $emailProvided = array_key_exists('email', $data);
+        $email = $emailProvided ? $this->normalizedOptionalEmail($data['email']) : $this->normalizedOptionalEmail($existing->email ?? null);
+
+        if (!$this->roleAllowsMissingEmail($role) && $email === null) {
+            return response()->json(['status' => 'error', 'message' => 'Email is required for this role'], 422);
+        }
+
+        if ($emailProvided && $email !== null) {
             if (DB::table('users')
-                ->where('email', $data['email'])
+                ->where('email', $email)
                 ->where('id', '!=', $id)
                 ->whereNull('deleted_at')
                 ->exists()) {
@@ -1005,7 +1042,6 @@ class UserController extends Controller
         $updates = [];
         foreach ([
             'name',
-            'email',
             'phone_number',
             'alternative_email',
             'alternative_phone_number',
@@ -1016,6 +1052,9 @@ class UserController extends Controller
             if (array_key_exists($key, $data)) {
                 $updates[$key] = $data[$key];
             }
+        }
+        if ($emailProvided) {
+            $updates['email'] = $email;
         }
 
         if (array_key_exists('role', $data) || array_key_exists('role_short_form', $data)) {
@@ -1487,8 +1526,8 @@ class UserController extends Controller
 
         $file = $request->file('file');
 
-        $defaultPassword = (string) ($request->input('default_password') ?: 'Employee@123');
-        $defaultRoleIn   = (string) ($request->input('default_role') ?: 'employee');
+        $defaultPassword = (string) ($request->input('default_password') ?: 'Patient@123');
+        $defaultRoleIn   = (string) ($request->input('default_role') ?: 'patient');
         [$defaultRole, $defaultRoleShort] = $this->normalizeRole($defaultRoleIn, null);
 
         $path = $file->getRealPath();
@@ -1512,14 +1551,19 @@ class UserController extends Controller
             return preg_replace('/\s+/', '_', $h);
         }, $header);
 
-        foreach (['name', 'email'] as $req) {
-            if (!in_array($req, $header, true)) {
-                fclose($handle);
-                return response()->json([
-                    'status'  => 'error',
-                    'message' => "CSV must contain '{$req}' column in header",
-                ], 422);
-            }
+        if (!in_array('name', $header, true)) {
+            fclose($handle);
+            return response()->json([
+                'status'  => 'error',
+                'message' => "CSV must contain 'name' column in header",
+            ], 422);
+        }
+        if (!in_array('role', $header, true)) {
+            fclose($handle);
+            return response()->json([
+                'status'  => 'error',
+                'message' => "CSV must contain 'role' column in header",
+            ], 422);
         }
 
         $actorId = $this->currentUserId($request);
@@ -1557,19 +1601,32 @@ class UserController extends Controller
                 $whatsappNumber          = trim((string) ($row['whatsapp_number'] ?? ''));
                 $address                 = trim((string) ($row['address'] ?? ''));
 
-                if ($name === '' || $email === '') {
+                if (trim($roleIn) !== '') {
+                    [$role, $roleShort] = $this->normalizeRole($roleIn, null);
+                } else {
+                    $role      = $defaultRole;
+                    $roleShort = $defaultRoleShort;
+                }
+
+                if ($name === '') {
                     $skipped++;
-                    $errors[] = "Row {$rowIndex}: name/email missing";
+                    $errors[] = "Row {$rowIndex}: name missing";
                     continue;
                 }
 
-                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                if ($email === '' && !$this->roleAllowsMissingEmail($role)) {
+                    $skipped++;
+                    $errors[] = "Row {$rowIndex}: email missing for role {$role}";
+                    continue;
+                }
+
+                if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $skipped++;
                     $errors[] = "Row {$rowIndex}: invalid email {$email}";
                     continue;
                 }
 
-                if (DB::table('users')->where('email', $email)->whereNull('deleted_at')->exists()) {
+                if ($email !== '' && DB::table('users')->where('email', $email)->whereNull('deleted_at')->exists()) {
                     $skipped++;
                     $errors[] = "Row {$rowIndex}: email already exists {$email}";
                     continue;
@@ -1584,13 +1641,6 @@ class UserController extends Controller
 
                 $finalPassword = trim($password) !== '' ? $password : $defaultPassword;
 
-                if (trim($roleIn) !== '') {
-                    [$role, $roleShort] = $this->normalizeRole($roleIn, null);
-                } else {
-                    $role      = $defaultRole;
-                    $roleShort = $defaultRoleShort;
-                }
-
                 do {
                     $uuid = (string) Str::uuid();
                 } while (DB::table('users')->where('uuid', $uuid)->exists());
@@ -1603,7 +1653,7 @@ class UserController extends Controller
                 DB::table('users')->insert([
                     'uuid'                     => $uuid,
                     'name'                     => $name,
-                    'email'                    => $email,
+                    'email'                    => $email !== '' ? $email : null,
                     'phone_number'             => $phoneNumber !== '' ? $phoneNumber : null,
                     'alternative_email'        => $alternativeEmail !== '' ? $alternativeEmail : null,
                     'alternative_phone_number' => $alternativePhoneNumber !== '' ? $alternativePhoneNumber : null,
@@ -1709,7 +1759,7 @@ class UserController extends Controller
 
         $v = Validator::make($request->all(), [
             'name'                     => 'sometimes|string|max:150',
-            'email'                    => 'sometimes|email|max:255',
+            'email'                    => 'sometimes|nullable|email|max:255',
             'phone_number'             => 'sometimes|nullable|string|max:32',
             'alternative_email'        => 'sometimes|nullable|email|max:255',
             'alternative_phone_number' => 'sometimes|nullable|string|max:32',
@@ -1739,9 +1789,19 @@ class UserController extends Controller
             ], 401);
         }
 
-        if (array_key_exists('email', $data)) {
+        $emailProvided = array_key_exists('email', $data);
+        $email = $emailProvided ? $this->normalizedOptionalEmail($data['email']) : $this->normalizedOptionalEmail($existing->email ?? null);
+
+        if (!$this->roleAllowsMissingEmail($existing->role ?? null) && $email === null) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Email is required for this role',
+            ], 422);
+        }
+
+        if ($emailProvided && $email !== null) {
             if (DB::table('users')
-                ->where('email', $data['email'])
+                ->where('email', $email)
                 ->where('id', '!=', (int) $authId)
                 ->whereNull('deleted_at')
                 ->exists()) {
@@ -1768,7 +1828,6 @@ class UserController extends Controller
         $updates = [];
         foreach ([
             'name',
-            'email',
             'phone_number',
             'alternative_email',
             'alternative_phone_number',
@@ -1778,6 +1837,9 @@ class UserController extends Controller
             if (array_key_exists($key, $data)) {
                 $updates[$key] = $data[$key];
             }
+        }
+        if ($emailProvided) {
+            $updates['email'] = $email;
         }
 
         if (array_key_exists('name', $updates) && $updates['name'] !== $existing->name) {
@@ -2138,43 +2200,79 @@ class UserController extends Controller
             ->toString();
 
         $map = [
-            'admin'             => 'admin',
-            'administrator'     => 'admin',
-            'adm'               => 'admin',
-            'super admin'       => 'admin',
-            'superadmin'        => 'admin',
+            // admin
+            'admin'                 => 'admin',
+            'administrator'         => 'admin',
+            'adm'                   => 'admin',
+            'super admin'           => 'admin',
+            'superadmin'            => 'admin',
+            'super administrator'   => 'admin',
+            'sa'                    => 'admin',
+            'college administrator' => 'admin',
+            'college admin'         => 'admin',
+            'collegeadmin'          => 'admin',
+            'coladmin'              => 'admin',
+            'cadm'                  => 'admin',
 
-            'hr'                => 'hr',
-            'human resources'   => 'hr',
-            'human resource'    => 'hr',
-            'hr manager'        => 'hr',
-            'people ops'        => 'hr',
-            'people operations' => 'hr',
-            'recruiter'         => 'hr',
+            // doctor
+            'doctor'               => 'doctor',
+            'doctors'              => 'doctor',
+            'physician'            => 'doctor',
+            'dr'                   => 'doctor',
+            'doc'                  => 'doctor',
+            'examiner'             => 'doctor',
+            'invigilator'          => 'doctor',
+            'proctor'              => 'doctor',
+            'exam controller'      => 'doctor',
+            'exam admin'           => 'doctor',
+            'exm'                  => 'doctor',
+            'academic counsellor'  => 'doctor',
+            'academic counselor'   => 'doctor',
+            'academic advisor'     => 'doctor',
+            'academic adviser'     => 'doctor',
+            'acc'                  => 'doctor',
 
-            'employee'          => 'employee',
-            'staff'             => 'employee',
-            'team member'       => 'employee',
-            'associate'         => 'employee',
-            'executive'         => 'employee',
-            'manager'           => 'employee',
-            'supervisor'        => 'employee',
-            'officer'           => 'employee',
-            'member'            => 'employee',
-            'emp'               => 'employee',
-            'staff member'      => 'employee',
-            'user'              => 'employee',
+            // patient
+            'patient'   => 'patient',
+            'patients'  => 'patient',
+            'student'   => 'patient',
+            'students'  => 'patient',
+            'candidate' => 'patient',
+            'learner'   => 'patient',
+            'pat'       => 'patient',
+            'std'       => 'patient',
+            'stu'       => 'patient',
+
+            // author
+            'author'         => 'author',
+            'writer'         => 'author',
+            'content writer' => 'author',
+            'contentwriter'  => 'author',
+            'editor'         => 'author',
+            'aut'            => 'author',
         ];
 
         $r = $map[$key] ?? $key;
 
         if (!in_array($r, self::ROLES, true)) {
-            $r = 'employee';
+            $r = 'patient';
         }
 
-        $short = $short ?: (self::ROLE_SHORT[$r] ?? 'EMP');
+        $short = $short ?: (self::ROLE_SHORT[$r] ?? 'PAT');
 
         return [$r, strtoupper($short)];
+    }
+
+    protected function roleAllowsMissingEmail(?string $role): bool
+    {
+        [$normalized] = $this->normalizeRole($role, null);
+        return $normalized === 'doctor';
+    }
+
+    protected function normalizedOptionalEmail($value): ?string
+    {
+        $email = trim((string) ($value ?? ''));
+        return $email !== '' ? $email : null;
     }
 
     protected function saveProfileImage($uploadedFile)

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>@yield('title','Attendance System')</title>
+  <title>@yield('title','Doctor Booking Admin')</title>
 
   <meta name="csrf-token" content="{{ csrf_token() }}"/>
 
@@ -27,8 +27,8 @@
       --w3-rail-text: var(--text-color);
       --w3-rail-muted: var(--muted-color);
       --w3-rail-border: var(--line-strong);
-      --w3-rail-hover: rgba(15,118,110,.06);
-      --w3-rail-active: rgba(15,118,110,.12);
+      --w3-rail-hover: rgba(139,46,58,.05);
+      --w3-rail-active: rgba(139,46,58,.10);
       --w3-appbar-h: 52px;
 
       --w3-rule-grad-l: linear-gradient(90deg, rgba(2,6,23,0), rgba(2,6,23,.12), rgba(2,6,23,0));
@@ -194,9 +194,9 @@
     }
 
     @keyframes w3FocusFlash{
-      0%   { box-shadow: 0 0 0 0 rgba(15,118,110,0); }
-      20%  { box-shadow: 0 0 0 5px rgba(15,118,110,.14); }
-      100% { box-shadow: 0 0 0 0 rgba(15,118,110,0); }
+      0%   { box-shadow: 0 0 0 0 rgba(139,46,58,0); }
+      20%  { box-shadow: 0 0 0 5px rgba(139,46,58,.12); }
+      100% { box-shadow: 0 0 0 0 rgba(139,46,58,0); }
     }
 
     html.theme-dark .w3-link.w3-focus-flash{
@@ -204,9 +204,9 @@
     }
 
     @keyframes w3FocusFlashDark{
-      0%   { box-shadow: 0 0 0 0 rgba(15,118,110,0); }
-      20%  { box-shadow: 0 0 0 5px rgba(15,118,110,.18); }
-      100% { box-shadow: 0 0 0 0 rgba(15,118,110,0); }
+      0%   { box-shadow: 0 0 0 0 rgba(139,46,58,0); }
+      20%  { box-shadow: 0 0 0 5px rgba(139,46,58,.16); }
+      100% { box-shadow: 0 0 0 0 rgba(139,46,58,0); }
     }
 
     .w3-toggle{
@@ -346,6 +346,132 @@
       display:inline-flex;
     }
 
+    .shared-quick-rail{
+      position:fixed;
+      top:50%;
+      transform:translateY(-50%);
+      display:grid;
+      gap:10px;
+      z-index:1020;
+      pointer-events:none;
+    }
+
+    .shared-quick-rail-left{
+      left:0;
+    }
+
+    .shared-quick-rail-right{
+      right:0;
+    }
+
+    .shared-quick-badge{
+      pointer-events:auto;
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:46px;
+      height:48px;
+      padding:0;
+      border-radius:14px 0 0 14px;
+      background:linear-gradient(180deg, rgba(255,255,255,.96) 0%, color-mix(in srgb, var(--surface, #fff) 88%, var(--primary-color, #0ea5e9) 12%) 100%);
+      border:1px solid color-mix(in srgb, var(--primary-color, #0ea5e9) 20%, transparent);
+      border-right:0;
+      box-shadow:0 10px 20px rgba(15,23,42,.12);
+      color:var(--ink);
+      text-decoration:none;
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+    }
+
+    .shared-quick-badge.is-left{
+      border-radius:0 14px 14px 0;
+      border-right:1px solid color-mix(in srgb, var(--primary-color, #0ea5e9) 20%, transparent);
+      border-left:0;
+    }
+
+    .shared-quick-badge.is-service{
+      width:auto;
+      min-width:88px;
+      height:40px;
+      justify-content:flex-start;
+      gap:6px;
+      padding:0 10px 0 8px;
+    }
+
+    .shared-quick-badge:hover{
+      color:var(--accent-color);
+      transform:translateX(-2px);
+      box-shadow:0 16px 28px rgba(15,23,42,.14);
+    }
+
+    .shared-quick-badge.is-left:hover{
+      transform:translateX(2px);
+    }
+
+    .shared-quick-badge::after{
+      content:"";
+      position:absolute;
+      right:0;
+      top:11px;
+      bottom:11px;
+      width:3px;
+      border-radius:999px 0 0 999px;
+      background:linear-gradient(180deg, var(--primary-color, #0ea5e9) 0%, var(--accent-color, #2563eb) 100%);
+    }
+
+    .shared-quick-badge.is-left::after{
+      right:auto;
+      left:0;
+      border-radius:0 999px 999px 0;
+    }
+
+    .shared-quick-badge-icon{
+      width:100%;
+      height:100%;
+      display:grid;
+      place-items:center;
+      color:var(--accent-color);
+      font-size:1.05rem;
+    }
+
+    .shared-quick-badge.is-service .shared-quick-badge-icon{
+      width:18px;
+      height:18px;
+      flex:0 0 18px;
+      font-size:.88rem;
+    }
+
+    .shared-quick-badge-copy{
+      position:absolute;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0, 0, 0, 0);
+      white-space:nowrap;
+      border:0;
+    }
+
+    .shared-quick-badge.is-service .shared-quick-badge-copy{
+      position:static;
+      width:auto;
+      height:auto;
+      padding:0;
+      margin:0;
+      overflow:visible;
+      clip:auto;
+      white-space:nowrap;
+      border:0;
+      color:var(--accent-color);
+      font-size:.7rem;
+      font-weight:800;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      line-height:1;
+    }
+
     .w3-profile-link{
       width:36px;
       height:36px;
@@ -382,7 +508,7 @@
       font-size:12px;
       font-weight:800;
       color:var(--secondary-color);
-      background:rgba(15,118,110,.08);
+      background:rgba(139,46,58,.08);
       text-transform:uppercase;
       line-height:1;
     }
@@ -525,6 +651,70 @@
       .w3-profile-link{
         display:inline-flex!important;
       }
+
+      .shared-quick-rail-left{
+        left:0;
+        top:44%;
+        transform:translateY(-50%);
+        right:auto;
+      }
+
+      .shared-quick-rail-right{
+        right:0;
+        left:auto;
+        top:50%;
+        transform:translateY(-50%);
+      }
+
+      .shared-quick-badge{
+        width:40px;
+        min-width:40px;
+        height:42px;
+        border-radius:12px 0 0 12px;
+        border-right:1px solid color-mix(in srgb, var(--primary-color, #0ea5e9) 20%, transparent);
+      }
+
+      .shared-quick-badge.is-left{
+        border-radius:0 12px 12px 0;
+      }
+
+      .shared-quick-badge.is-service{
+        min-width:74px;
+        height:34px;
+        padding:0 8px 0 7px;
+        gap:5px;
+      }
+
+      .shared-quick-badge::after{
+        top:9px;
+        bottom:9px;
+        width:2px;
+        left:auto;
+        right:0;
+        height:auto;
+        border-radius:999px 0 0 999px;
+      }
+
+      .shared-quick-badge-icon{
+        font-size:.92rem;
+      }
+
+      .shared-quick-badge.is-left::after{
+        right:auto;
+        left:0;
+        border-radius:0 999px 999px 0;
+      }
+
+      .shared-quick-badge.is-service .shared-quick-badge-icon{
+        width:16px;
+        height:16px;
+        flex-basis:16px;
+        font-size:.76rem;
+      }
+
+      .shared-quick-badge.is-service .shared-quick-badge-copy{
+        font-size:.62rem;
+      }
     }
 
     @media (max-width: 575px){
@@ -547,7 +737,7 @@
     }
 
     html.theme-dark .w3-link.active{
-      background:rgba(15,118,110,.18);
+      background:rgba(139,46,58,.18);
     }
 
     html.theme-dark .w3-overlay{
@@ -583,7 +773,7 @@
     }
 
     html.theme-dark .w3-profile-initial{
-      background:rgba(15,118,110,.18);
+      background:rgba(139,46,58,.18);
       color:#f7d7dd;
     }
 
@@ -700,13 +890,37 @@
       background:linear-gradient(180deg, rgba(59,130,246,.08), rgba(15,23,42,.96));
     }
 
-    /* ── Page content entrance ── */
+    /* ── Page content entrance ──
+       IMPORTANT: Do not animate .w3-content with transform.
+       Bootstrap modals are rendered inside #mainContentWrap, but Bootstrap
+       places .modal-backdrop directly under <body>. A transformed parent
+       creates a new stacking context, so the backdrop can appear above the
+       modal form. Keep this animation opacity-only. */
     .w3-content{
-      animation:fadeInUp .38s .08s ease both;
+      animation:w3ContentFadeIn .32s .08s ease both;
+      transform:none !important;
     }
 
     @keyframes fadeInDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
     @keyframes fadeInUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes w3ContentFadeIn{from{opacity:0}to{opacity:1}}
+
+    /* Bootstrap modal stack safety.
+       Keeps sidebar overlay/backdrop below the modal and prevents it from
+       visually covering Add/Edit forms. */
+    body.modal-open .w3-content{
+      transform:none !important;
+      animation:none !important;
+    }
+    body.modal-open .w3-overlay{
+      opacity:0 !important;
+      visibility:hidden !important;
+      pointer-events:none !important;
+    }
+    .modal-backdrop{ z-index:2040 !important; }
+    .modal{ z-index:2050 !important; }
+    .offcanvas-backdrop{ z-index:2030 !important; }
+    .offcanvas{ z-index:2045 !important; }
   </style>
 
   <style>
@@ -782,9 +996,6 @@
 
         <a href="/role-privileges/manage" class="w3-link">
           <i class="fa-solid fa-user-shield"></i><span>Assign Role Privileges</span>
-        </a>
-        <a href="/user-privileges/manage" class="w3-link">
-          <i class="fa-solid fa-user-lock"></i><span>Assign User Privileges</span>
         </a>
       </nav>
 
