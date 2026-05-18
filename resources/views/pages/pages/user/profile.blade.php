@@ -754,23 +754,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function formatRole(role) {
     const map = {
-      super_admin: 'Super Admin',
       admin: 'Admin',
-      instructor: 'Instructor',
-      faculty: 'Faculty',
-      student: 'Student',
-      author: 'Author',
-      principal: 'Principal',
-      director: 'Director',
-      hod: 'Head of Department',
-      professor: 'Professor',
-      associate_professor: 'Associate Professor',
-      assistant_professor: 'Assistant Professor',
-      lecturer: 'Lecturer',
-      technical_staff: 'Technical Staff',
-      lab_assistant: 'Lab Assistant',
-      patient: 'Patient',
-      doctor: 'Doctor'
+      hr: 'HR',
+      employee: 'Employee'
     };
     return map[String(role || '').toLowerCase()] || (role || '—');
   }

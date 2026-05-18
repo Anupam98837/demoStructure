@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Register - Doctor Booking</title>
+  <title>Register - Attendance System</title>
   <meta name="csrf-token" content="{{ csrf_token() }}"/>
 
   <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/media/images/web/favicon.png') }}">
@@ -419,10 +419,10 @@
     <div class="ux-brand-inner">
       <div class="ux-brand-head">
         <div class="ux-brand-mark">
-          <img src="{{ asset('/assets/media/images/web/logo.png') }}" alt="Doctor Booking">
+          <img src="{{ asset('/assets/media/images/web/logo.png') }}" alt="Attendance System">
         </div>
         <div class="ux-brand-copy">
-          <strong>Doctor Booking</strong>
+          <strong>Attendance System</strong>
           <span>Quick account setup</span>
         </div>
       </div>
@@ -441,7 +441,7 @@
   <main class="ux-form-side">
     <div class="ux-form-shell">
       <div class="ux-topline">
-        <a href="{{ route('directory.home') }}">Back to Home</a>
+        <a href="/">Back to Login</a>
       </div>
 
       <section class="ux-card">
@@ -596,7 +596,7 @@
         });
         const data = await res.json().catch(() => ({}));
         if (res.ok && data && data.user) {
-          const resolvedRole = (data.user.role || role || 'patient').toString().toLowerCase();
+          const resolvedRole = (data.user.role || role || 'employee').toString().toLowerCase();
           sessionStorage.setItem('token', token);
           sessionStorage.setItem('role', resolvedRole);
           window.location.replace(resolveNextPath(rolePath(resolvedRole)));
@@ -658,7 +658,7 @@
         }
 
         const token = data?.access_token || data?.token || '';
-        const role = (data?.user?.role || 'patient').toLowerCase();
+        const role = (data?.user?.role || 'employee').toLowerCase();
 
         if (!token) {
           showAlert('error', 'No token received from server.');

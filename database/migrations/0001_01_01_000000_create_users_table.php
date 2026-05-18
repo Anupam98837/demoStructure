@@ -37,8 +37,8 @@ return new class extends Migration
             $table->text('address')->nullable();
 
             // Roles
-            $table->string('role', 50)->default('student');
-            $table->string('role_short_form', 10)->default('STD');
+            $table->string('role', 50)->default('employee');
+            $table->string('role_short_form', 10)->default('EMP');
 
             // Status / tracking
             $table->string('status', 20)->default('active');

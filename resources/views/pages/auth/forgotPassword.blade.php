@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Forgot Password — Doctor Booking</title>
+  <title>Forgot Password — Attendance System</title>
 
   <meta name="csrf-token" content="{{ csrf_token() }}"/>
 
@@ -143,7 +143,7 @@
   <section class="ux-left">
 
     <div class="ux-brand">
-      <img src="{{ asset('/assets/media/images/web/logo.png') }}" alt="Doctor Booking">
+      <img src="{{ asset('/assets/media/images/web/logo.png') }}" alt="Attendance System">
     </div>
 
     <h1 class="ux-title" id="fp_title">Forgot your password?</h1>

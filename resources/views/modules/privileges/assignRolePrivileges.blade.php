@@ -553,10 +553,7 @@ document.addEventListener('DOMContentLoaded', ()=> {
   // (role is NOT restricted server-side; this is only UI suggestions)
   // ==========================================================
   const ROLE_OPTIONS = [
-    'super_admin','admin','director','principal','hod',
-    'instructor','faculty','author','student',
-    'professor','associate_professor','assistant_professor','lecturer',
-    'technical_staff','lab_assistant','examiner'
+    'admin','hr','employee'
   ];
 
   function populateRoleSelect(){

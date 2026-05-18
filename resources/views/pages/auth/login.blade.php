@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Login - Doctor Booking</title>
+  <title>Login - Attendance System</title>
   <meta name="csrf-token" content="{{ csrf_token() }}"/>
 
   <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/media/images/web/favicon.png') }}">
@@ -16,14 +16,14 @@
 
   <style>
     :root{
-      --ux-bg:#f3f7fb;
+      --ux-bg:#f5f5ef;
       --ux-surface:#ffffff;
-      --ux-ink:#14324c;
-      --ux-copy:#6a8093;
-      --ux-line:rgba(20,50,76,.10);
-      --ux-primary:#0e7ac4;
-      --ux-secondary:#0da58f;
-      --ux-dark:#0f314d;
+      --ux-ink:#1f352e;
+      --ux-copy:#6b7b73;
+      --ux-line:rgba(31,53,46,.10);
+      --ux-primary:#0f766e;
+      --ux-secondary:#d97706;
+      --ux-dark:#12352f;
       --ux-radius-xl:32px;
       --ux-radius-lg:24px;
       --ux-radius-md:18px;
@@ -38,8 +38,8 @@
       font-family:"DM Sans",sans-serif;
       color:var(--ux-ink);
       background:
-        radial-gradient(circle at top left, rgba(13,165,143,.08), transparent 18%),
-        radial-gradient(circle at bottom right, rgba(14,122,196,.10), transparent 22%),
+        radial-gradient(circle at top left, rgba(15,118,110,.08), transparent 18%),
+        radial-gradient(circle at bottom right, rgba(217,119,6,.10), transparent 22%),
         linear-gradient(180deg,#fbfdff 0%, var(--ux-bg) 100%);
     }
 
@@ -50,7 +50,7 @@
     }
 
     .ux-brand-side{
-      background:linear-gradient(160deg, #123a5b 0%, #14557d 58%, #0da58f 100%);
+      background:linear-gradient(160deg, #15322e 0%, #0f766e 58%, #d97706 100%);
       color:#fff;
       padding:clamp(28px,5vw,56px);
       display:flex;
@@ -421,21 +421,21 @@
     <div class="ux-brand-inner">
       <div class="ux-brand-head">
         <div class="ux-brand-mark">
-          <img src="{{ asset('/assets/media/images/web/logo.png') }}" alt="Doctor Booking">
+          <img src="{{ asset('/assets/media/images/web/logo.png') }}" alt="Attendance System">
         </div>
         <div class="ux-brand-copy">
-          <strong>Doctor Booking</strong>
-          <span>Simple patient access</span>
+          <strong>Attendance System</strong>
+          <span>Employee workspace access</span>
         </div>
       </div>
 
-      <span class="ux-kicker"><i class="fa-solid fa-shield-heart"></i> Secure Login</span>
-      <h1 class="ux-brand-title">Log in and continue your booking flow.</h1>
-      <p class="ux-brand-text">Use your registered email or phone number to access your account and return to the next step.</p>
+      <span class="ux-kicker"><i class="fa-solid fa-shield-check"></i> Secure Login</span>
+      <h1 class="ux-brand-title">Sign in to your attendance workspace.</h1>
+      <p class="ux-brand-text">Use your registered email or phone number to access attendance operations, user management, and role-based tools.</p>
 
       <div class="ux-brand-pills">
-        <span><i class="fa-solid fa-check"></i> Fast access</span>
-        <span><i class="fa-solid fa-check"></i> Session based</span>
+        <span><i class="fa-solid fa-check"></i> Role based access</span>
+        <span><i class="fa-solid fa-check"></i> Shared admin shell</span>
       </div>
     </div>
   </aside>
@@ -443,7 +443,7 @@
   <main class="ux-form-side">
     <div class="ux-form-shell">
       <div class="ux-topline">
-        <a href="{{ route('directory.home') }}">Back to Home</a>
+        <a href="/dashboard">Go to Dashboard</a>
       </div>
 
       <section class="ux-card">
@@ -485,11 +485,6 @@
           <button class="ux-login" id="ux_btn" type="submit">
             <span class="me-2"><i class="fa-solid fa-right-to-bracket"></i></span> Login
           </button>
-
-          <div class="ux-footer">
-            Don’t have an account?
-            <a href="/register" id="ux_register_link">Create one</a>
-          </div>
         </form>
       </section>
     </div>
@@ -510,17 +505,12 @@
     const btn = document.getElementById('ux_btn');
     const alertEl = document.getElementById('ux_alert');
     const toggle = document.getElementById('ux_togglePw');
-    const registerLink = document.getElementById('ux_register_link');
     const redirectParam = new URLSearchParams(window.location.search).get('redirect') || '';
 
     function resolveNextPath(fallback){
       if (!redirectParam) return fallback;
       if (!redirectParam.startsWith('/') || redirectParam.startsWith('//')) return fallback;
       return redirectParam;
-    }
-
-    if (registerLink && redirectParam && redirectParam.startsWith('/')) {
-      registerLink.href = '/register?redirect=' + encodeURIComponent(redirectParam);
     }
 
     function setBusy(isBusy){
@@ -639,7 +629,7 @@
         }
 
         const token = data?.access_token || data?.token || '';
-        const role = (data?.user?.role || localStorage.getItem('role') || 'patient').toLowerCase();
+        const role = (data?.user?.role || localStorage.getItem('role') || 'employee').toLowerCase();
 
         if (!token) {
           showAlert('error', 'No token received from server.');

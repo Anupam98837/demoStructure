@@ -68,7 +68,7 @@ trait PersistsAdminNotifications
 
             $query = DB::table('users')
                 ->select('id', 'role', 'status')
-                ->whereIn('role', ['admin', 'super_admin']);
+                ->whereIn('role', ['admin', 'hr']);
 
             if (Schema::hasColumn('users', 'deleted_at')) {
                 $query->whereNull('deleted_at');

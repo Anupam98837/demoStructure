@@ -34,7 +34,7 @@ class RolePrivilegeController extends Controller
     private function canManageRolePrivileges(array $actor): bool
     {
         $r = $this->normalizeRoleKey($actor['role'] ?? '');
-        return in_array($r, ['super_admin', 'admin', 'author', 'director', 'principal'], true);
+        return $r === 'admin';
     }
 
     /* =========================

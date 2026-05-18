@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>@yield('title','Doctor Booking Admin')</title>
+  <title>@yield('title','Attendance System')</title>
 
   <meta name="csrf-token" content="{{ csrf_token() }}"/>
 
@@ -27,8 +27,8 @@
       --w3-rail-text: var(--text-color);
       --w3-rail-muted: var(--muted-color);
       --w3-rail-border: var(--line-strong);
-      --w3-rail-hover: rgba(139,46,58,.05);
-      --w3-rail-active: rgba(139,46,58,.10);
+      --w3-rail-hover: rgba(15,118,110,.06);
+      --w3-rail-active: rgba(15,118,110,.12);
       --w3-appbar-h: 52px;
 
       --w3-rule-grad-l: linear-gradient(90deg, rgba(2,6,23,0), rgba(2,6,23,.12), rgba(2,6,23,0));
@@ -194,9 +194,9 @@
     }
 
     @keyframes w3FocusFlash{
-      0%   { box-shadow: 0 0 0 0 rgba(139,46,58,0); }
-      20%  { box-shadow: 0 0 0 5px rgba(139,46,58,.12); }
-      100% { box-shadow: 0 0 0 0 rgba(139,46,58,0); }
+      0%   { box-shadow: 0 0 0 0 rgba(15,118,110,0); }
+      20%  { box-shadow: 0 0 0 5px rgba(15,118,110,.14); }
+      100% { box-shadow: 0 0 0 0 rgba(15,118,110,0); }
     }
 
     html.theme-dark .w3-link.w3-focus-flash{
@@ -204,9 +204,9 @@
     }
 
     @keyframes w3FocusFlashDark{
-      0%   { box-shadow: 0 0 0 0 rgba(139,46,58,0); }
-      20%  { box-shadow: 0 0 0 5px rgba(139,46,58,.16); }
-      100% { box-shadow: 0 0 0 0 rgba(139,46,58,0); }
+      0%   { box-shadow: 0 0 0 0 rgba(15,118,110,0); }
+      20%  { box-shadow: 0 0 0 5px rgba(15,118,110,.18); }
+      100% { box-shadow: 0 0 0 0 rgba(15,118,110,0); }
     }
 
     .w3-toggle{
@@ -382,7 +382,7 @@
       font-size:12px;
       font-weight:800;
       color:var(--secondary-color);
-      background:rgba(139,46,58,.08);
+      background:rgba(15,118,110,.08);
       text-transform:uppercase;
       line-height:1;
     }
@@ -547,7 +547,7 @@
     }
 
     html.theme-dark .w3-link.active{
-      background:rgba(139,46,58,.18);
+      background:rgba(15,118,110,.18);
     }
 
     html.theme-dark .w3-overlay{
@@ -583,7 +583,7 @@
     }
 
     html.theme-dark .w3-profile-initial{
-      background:rgba(139,46,58,.18);
+      background:rgba(15,118,110,.18);
       color:#f7d7dd;
     }
 
@@ -724,7 +724,7 @@
 <aside id="sidebar" class="w3-sidebar" aria-label="Sidebar">
   <div class="w3-sidebar-head">
     <a href="/dashboard" class="w3-brand">
-      <img id="logo" src="{{ asset('/assets/media/images/web/logo.png') }}" alt="Doctor Booking">
+      <img id="logo" src="{{ asset('/assets/media/images/web/logo.png') }}" alt="Attendance System">
     </a>
   </div>
 
@@ -737,111 +737,27 @@
       <a href="/dashboard" class="w3-link"><i class="fa-solid fa-gauge"></i><span>Dashboard</span></a>
     </nav>
 
-    <div id="patientBookingMenu" style="display:none">
-      <div class="w3-nav-section">
-        <div class="w3-section-title"><i class="fa-solid fa-calendar-check"></i> BOOKINGS</div>
-        <div class="w3-section-rule"></div>
-      </div>
-      <nav class="w3-menu" aria-label="Patient Bookings">
-        <a href="/my-bookings" class="w3-link">
-          <i class="fa-solid fa-calendar-days"></i><span>My Bookings</span>
-        </a>
-      </nav>
-    </div>
-
-    <div id="studentAcademicMenu" style="display:none">
-      <div class="w3-nav-section">
-        <div class="w3-section-title"><i class="fa-solid fa-graduation-cap"></i> ACADEMICS</div>
-        <div class="w3-section-rule"></div>
-      </div>
-      <nav class="w3-menu" aria-label="Student Academics">
-        <a href="/syllabus" class="w3-link" id="studentSyllabusLink">
-          <i class="fa-solid fa-book"></i><span>Syllabus</span>
-        </a>
-        <a href="/lesson-plan" class="w3-link" id="studentLessonPlanLink">
-          <i class="fa-solid fa-calendar-days"></i><span>Lesson Plan</span>
-        </a>
-        <a href="/notices" class="w3-link" id="studentNoticesLink">
-          <i class="fa-solid fa-bullhorn"></i><span>Notices</span>
-        </a>
-        <a href="/study-material" class="w3-link" id="studentStudyMaterialLink">
-          <i class="fa-solid fa-file-arrow-up"></i><span>Study Material</span>
-        </a>
-        <a href="/assignments" class="w3-link" id="studentAssignmentsLink">
-          <i class="fa-solid fa-file-signature"></i><span>Assignments</span>
-        </a>
-        <a href="/quizzes" class="w3-link" id="studentQuizzesLink">
-          <i class="fa-solid fa-clipboard-question"></i><span>Quizzes</span>
-        </a>
-        <a href="/my/result" class="w3-link" id="studentQuizzesLink">
-          <i class="fa-solid fa-square-poll-vertical"></i><span>Result</span>
-        </a>
-      </nav>
-    </div>
-
     <div id="dynamicMenuWrap" style="display:none"></div>
 
     <div id="adminFullMenu" style="display:none">
-
       <div class="w3-nav-section">
-        <div class="w3-section-title"><i class="fa-solid fa-hospital"></i> HOSPITALS</div>
+        <div class="w3-section-title"><i class="fa-solid fa-users-gear"></i> WORKFORCE</div>
         <div class="w3-section-rule"></div>
       </div>
-      <nav class="w3-menu" aria-label="Hospitals">
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-hospital" aria-expanded="false">
-            <i class="fa-solid fa-hospital"></i><span>Hospital</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-hospital" class="w3-submenu" role="group" aria-label="Hospital submenu">
-            <a href="/hospital/create" class="w3-link"><span>Create Hospital</span></a>
-            <a href="/hospital/manage" class="w3-link"><span>Manage Hospital</span></a>
-          </div>
-        </div>
-        <a href="/departments" class="w3-link">
-          <i class="fa-solid fa-building"></i><span>Department</span>
-        </a>
-        <a href="/clinics/manage" class="w3-link">
-          <i class="fa-solid fa-clinic-medical"></i><span>Clinics</span>
-        </a>
-        <a href="/specializations/manage" class="w3-link">
-          <i class="fa-solid fa-stethoscope"></i><span>Specializations</span>
-        </a>
-        <a href="/designations/manage" class="w3-link">
-          <i class="fa-solid fa-user-tie"></i><span>Designations</span>
-        </a>
-        <a href="/registration-councils/manage" class="w3-link">
-          <i class="fa-solid fa-id-card"></i><span>Registration Councils</span>
-        </a>
-        <a href="/languages/manage" class="w3-link">
-          <i class="fa-solid fa-language"></i><span>Languages</span>
-        </a>
-        <a href="/services/manage" class="w3-link">
-          <i class="fa-solid fa-briefcase-medical"></i><span>Services</span>
-        </a>
-        <a href="/qualifications/manage" class="w3-link">
-          <i class="fa-solid fa-graduation-cap"></i><span>Qualifications</span>
-        </a>
-      </nav>
-
-      <div class="w3-nav-section">
-        <div class="w3-section-title"><i class="fa-solid fa-users"></i> USERS</div>
-        <div class="w3-section-rule"></div>
-      </div>
-      <nav class="w3-menu" aria-label="Users">
+      <nav class="w3-menu" aria-label="Workforce">
         <a href="/user/manage" class="w3-link">
           <i class="fa-solid fa-user-group"></i><span>Manage Users</span>
         </a>
-        <a href="/bookings/manage" class="w3-link">
-          <i class="fa-solid fa-calendar-check"></i><span>Manage Bookings</span>
+        <a href="/activity-logs" class="w3-link">
+          <i class="fa-solid fa-clock-rotate-left"></i><span>Activity Logs</span>
         </a>
       </nav>
 
       <div class="w3-nav-section">
-        <div class="w3-section-title"><i class="fa-solid fa-screwdriver-wrench"></i> PRIVILEGES</div>
+        <div class="w3-section-title"><i class="fa-solid fa-screwdriver-wrench"></i> ACCESS CONTROL</div>
         <div class="w3-section-rule"></div>
       </div>
-      <nav class="w3-menu" aria-label="Privileges">
+      <nav class="w3-menu" aria-label="Access Control">
         <div class="w3-group">
           <a href="#" class="w3-link w3-toggle" data-target="sm-dashboard-menu" aria-expanded="false">
             <i class="fa-solid fa-puzzle-piece"></i><span>Dashboard Menu</span>
@@ -866,6 +782,9 @@
 
         <a href="/role-privileges/manage" class="w3-link">
           <i class="fa-solid fa-user-shield"></i><span>Assign Role Privileges</span>
+        </a>
+        <a href="/user-privileges/manage" class="w3-link">
+          <i class="fa-solid fa-user-lock"></i><span>Assign User Privileges</span>
         </a>
       </nav>
 
@@ -901,12 +820,12 @@
     </button>
 
     <a href="/dashboard" class="w3-app-logo d-lg-none">
-      <img src="{{ asset('/assets/media/images/web/logo.png') }}" alt="Doctor Booking">
-      <span>Doctor Booking</span>
+      <img src="{{ asset('/assets/media/images/web/logo.png') }}" alt="Attendance System">
+      <span>Attendance System</span>
     </a>
 
     <strong class="w3-title ms-1 d-none d-lg-inline">
-      @yield('title','Doctor Booking')
+      @yield('title','Attendance System')
     </strong>
 
     <div class="ms-auto d-flex align-items-center gap-2">
@@ -1213,30 +1132,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const roleFromStorage = sessionStorage.getItem('role') || localStorage.getItem('role');
 
-  (function(){
-    const role = (roleFromStorage || '').toLowerCase();
-    if (role === 'director' || role === 'principal') {
-      const block = document.getElementById('siteSettingsContentBlock');
-      if (block) block.style.display = 'none';
-    }
-  })();
-
-  (function(){
-    const role = (roleFromStorage || '').toLowerCase();
-    const patientBookingMenu = document.getElementById('patientBookingMenu');
-    if (role === 'patient' && patientBookingMenu) {
-      patientBookingMenu.style.display = '';
-    }
-  })();
-
-  (function(){
-    const role = (roleFromStorage || '').toLowerCase();
-    const studentAcademicMenu = document.getElementById('studentAcademicMenu');
-    if (role === 'student' && studentAcademicMenu) {
-      studentAcademicMenu.style.display = '';
-    }
-  })();
-
   const API_SIDEBAR = '/api/my/sidebar-menus';
   const API_LOGOUT = '/api/auth/logout';
   const API_PROFILE_MINI = '/api/auth/profile';
@@ -1247,6 +1142,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const OPEN_MENU_KEY = 'msit_open_sidebar_menus';
 
   const adminFullMenu   = document.getElementById('adminFullMenu');
+  const alertsMenu = document.getElementById('alertsMenu');
   const dynamicMenuWrap = document.getElementById('dynamicMenuWrap');
   const mainContentWrap = document.getElementById('mainContentWrap');
   const notificationBadge = document.getElementById('notificationBadge');
@@ -1383,8 +1279,33 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function loadHeaderNotifications(options = {}){
-    setNotificationBadge(0);
-    renderNotificationDrawer([]);
+    if (!getBearerToken()) {
+      setNotificationBadge(0);
+      renderNotificationDrawer([]);
+      return;
+    }
+
+    try{
+      const [countResponse, drawerResponse] = await Promise.all([
+        fetch(API_NOTIFICATION_COUNT, { headers: notificationHeaders() }),
+        fetch(API_NOTIFICATION_DRAWER, { headers: notificationHeaders() })
+      ]);
+
+      const countResult = await countResponse.json().catch(() => ({}));
+      const drawerResult = await drawerResponse.json().catch(() => ({}));
+
+      if (!countResponse.ok || !drawerResponse.ok) {
+        throw new Error(drawerResult?.message || countResult?.message || 'Unable to load notifications.');
+      }
+
+      renderNotificationSnapshot({
+        unread_count: countResult.unread_count ?? drawerResult.unread_count ?? 0,
+        items: drawerResult.items || []
+      });
+    }catch(e){
+      setNotificationBadge(0);
+      renderNotificationDrawer([]);
+    }
   }
 
   window.loadHeaderNotifications = loadHeaderNotifications;
@@ -1437,7 +1358,7 @@ document.addEventListener('DOMContentLoaded', () => {
       confirmButtonText: 'Login again',
       allowOutsideClick: false,
       allowEscapeKey: false,
-      confirmButtonColor: '#9E363A'
+      confirmButtonColor: '#0f766e'
     });
 
     window.location.replace(LOGIN_PAGE);
@@ -1646,98 +1567,36 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const DEFAULT_ROUTE_META = {
-    '/hospital/create':             { section:'HOSPITALS',  header:'Hospital',        page:'Create Hospital',            icon:'fa-solid fa-hospital',        direct:false },
-    '/hospital/manage':             { section:'HOSPITALS',  header:'Hospital',        page:'Manage Hospital',            icon:'fa-solid fa-hospital',        direct:false },
-    '/doctor/profile':              { section:'HOSPITALS',  header:'Doctors',         page:'Doctor Profile',             icon:'fa-solid fa-user-doctor',     direct:true  },
-    '/clinics/manage':              { section:'HOSPITALS',  header:'Clinic',          page:'Manage Clinics',             icon:'fa-solid fa-clinic-medical',  direct:true  },
-    '/departments/create':          { section:'HOSPITALS',  header:'Department',      page:'Create Department',          icon:'fa-solid fa-building',        direct:true  },
-    '/campus/manage':                { section:'ACADEMICS', header:'Campus',          page:'Manage Campus',              icon:'fa-solid fa-building-columns', direct:false },
-    '/institutions/manage':          { section:'ACADEMICS', header:'Institution',     page:'Manage Institutions',        icon:'fa-solid fa-university',       direct:false },
-    '/departments':                  { section:'HOSPITALS',  header:'Department',      page:'Manage Departments',         icon:'fa-solid fa-building',         direct:true  },
-    '/departments/manage':          { section:'HOSPITALS',  header:'Department',      page:'Manage Departments',         icon:'fa-solid fa-building',         direct:true  },
-    '/specializations/manage':      { section:'HOSPITALS',  header:'Specialization',  page:'Manage Specializations',     icon:'fa-solid fa-stethoscope',     direct:true  },
-    '/designations/manage':         { section:'HOSPITALS',  header:'Designation',     page:'Manage Designations',        icon:'fa-solid fa-user-tie',        direct:true  },
-    '/registration-councils/manage':{ section:'HOSPITALS',  header:'Registration Council', page:'Manage Registration Councils', icon:'fa-solid fa-id-card',      direct:true  },
-    '/languages/manage':            { section:'HOSPITALS',  header:'Language',        page:'Manage Languages',           icon:'fa-solid fa-language',        direct:true  },
-    '/services/manage':             { section:'HOSPITALS',  header:'Service',         page:'Manage Services',            icon:'fa-solid fa-briefcase-medical', direct:true },
-    '/qualifications/manage':       { section:'HOSPITALS',  header:'Qualification',   page:'Manage Qualifications',      icon:'fa-solid fa-graduation-cap',  direct:true  },
-    '/courses/manage':               { section:'ACADEMICS', header:'Course',          page:'Manage Courses',             icon:'fa-solid fa-book-open',        direct:false },
-    '/course-type/manage':           { section:'ACADEMICS', header:'Course',          page:'Course Type',                icon:'fa-solid fa-book-open',        direct:false },
-    '/affiliation/manage':           { section:'ACADEMICS', header:'Course',          page:'Manage Affiliation',         icon:'fa-solid fa-book-open',        direct:false },
-    '/syllabus/view':                { section:'ACADEMICS', header:'Course',          page:'Syllabus',                   icon:'fa-solid fa-book-open',        direct:false },
-    '/my/syllabus/view':             { section:'ACADEMICS', header:'Academics',       page:'My Syllabus',                icon:'fa-solid fa-book',             direct:true  },
-    '/my/study-material':            { section:'ACADEMICS', header:'Academics',       page:'Study Material',             icon:'fa-solid fa-file-arrow-up',    direct:true  },
-    '/course-sections/manage':       { section:'ACADEMICS', header:'Section',         page:'Section',                    icon:'fa-solid fa-people-roof',      direct:true  },
-    '/intake-type/manage':           { section:'ACADEMICS', header:'Intake',          page:'Manage Intake Type',         icon:'fa-solid fa-chalkboard-teacher', direct:false },
-    '/reservation-type/manage':      { section:'ACADEMICS', header:'Intake',          page:'Manage Reservation Type',    icon:'fa-solid fa-chalkboard-teacher', direct:false },
-    '/intake/manage':                { section:'ACADEMICS', header:'Intake',          page:'Manage Intake',              icon:'fa-solid fa-chalkboard-teacher', direct:false },
-    '/subject-type/manage':          { section:'ACADEMICS', header:'Subject',         page:'Subject Type',               icon:'fa-solid fa-book',             direct:false },
-    '/subject/manage':               { section:'ACADEMICS', header:'Subject',         page:'Manage Subjects',            icon:'fa-solid fa-book',             direct:false },
-    '/faculty/subject/assign':       { section:'ACADEMICS', header:'Subject',         page:'Assign Subjects',            icon:'fa-solid fa-book',             direct:false },
-    '/class-types/manage':           { section:'ACADEMICS', header:'Routine',         page:'Class Type',                 icon:'fa-solid fa-calendar-days',    direct:false },
-    '/routine':                      { section:'ACADEMICS', header:'Routine',         page:'Manage Routines',            icon:'fa-solid fa-calendar-days',    direct:false },
-
-    '/feestructure/manage':          { section:'ACCOUNTING', header:'Fees',           page:'Fees Structure',             icon:'fa-solid fa-wallet',           direct:false },
-    '/fees':                         { section:'ACCOUNTING', header:'Fees',           page:'Manage Fees',                icon:'fa-solid fa-wallet',           direct:false },
-    '/fees/collect/view':            { section:'ACCOUNTING', header:'Fees',           page:'Collect Fees',               icon:'fa-solid fa-wallet',           direct:false },
-    '/scholarship-type/manage':      { section:'ACCOUNTING', header:'Scholarship',    page:'Manage Scholarship Type',    icon:'fa-solid fa-award',            direct:false },
-    '/scholarship/manage/view':      { section:'ACCOUNTING', header:'Scholarship',    page:'Manage Scholarship',         icon:'fa-solid fa-award',            direct:false },
-    '/scholarship/assign/view':      { section:'ACCOUNTING', header:'Scholarship',    page:'Assign Scholarship',         icon:'fa-solid fa-award',            direct:false },
-
-    '/user/manage':                  { section:'USERS',      header:'Users',          page:'Users',                      icon:'fa-solid fa-user-group',       direct:true  },
-    '/user-privileges/manage':       { section:'USERS',      header:'Users',          page:'Assign User Privileges',     icon:'fa-solid fa-user-lock',        direct:true  },
-    '/student/all':                  { section:'USERS',      header:'Student',        page:'All Students',               icon:'fa-solid fa-users',            direct:false },
-    '/student/register':             { section:'USERS',      header:'Student',        page:'Register',                   icon:'fa-solid fa-user-graduate',    direct:false },
-    '/student/promote':              { section:'USERS',      header:'Student',        page:'Promote',                    icon:'fa-solid fa-arrow-up-right-dots', direct:false },
-    '/exam/result/view':             { section:'USERS',      header:'Student',        page:'Exam Result',                icon:'fa-solid fa-square-poll-vertical', direct:false },
-
-    '/notice/create':                { section:'CONTENT',    header:'Notice',         page:'Create Notice',              icon:'fa-solid fa-bullhorn',         direct:false },
-    '/notice/manage':                { section:'CONTENT',    header:'Notice',         page:'Manage Notice',              icon:'fa-solid fa-bullhorn',         direct:false },
-    '/study-material/create':        { section:'CONTENT',    header:'Study Material', page:'Create Study Material',      icon:'fa-solid fa-file-arrow-up',    direct:false },
-    '/study-material/manage':        { section:'CONTENT',    header:'Study Material', page:'Manage Study Material',      icon:'fa-solid fa-file-arrow-up',    direct:false },
-    '/assignment/create':            { section:'CONTENT',    header:'Assignments',    page:'Create Assignments',         icon:'fa-solid fa-file-signature',   direct:false },
-    '/assignments/manage':           { section:'CONTENT',    header:'Assignments',    page:'Manage Assignments',         icon:'fa-solid fa-file-signature',   direct:false },
-
-    '/quizz/create':                 { section:'EXAMS',      header:'Quiz',           page:'Create Quiz',                icon:'fa-solid fa-file-pen',         direct:false },
-    '/quizz/manage':                 { section:'EXAMS',      header:'Quiz',           page:'Manage Quiz',                icon:'fa-solid fa-file-pen',         direct:false },
-    '/quizz/questions/manage':       { section:'EXAMS',      header:'Quiz',           page:'Question Bank',              icon:'fa-solid fa-list-check',       direct:false },
-    '/quizz/results':                { section:'EXAMS',      header:'Quiz',           page:'All Results',                icon:'fa-solid fa-square-poll-vertical', direct:false },
-
-    '/dashboard-menu/create':        { section:'PRIVILEGES', header:'Dashboard Menu', page:'Create Dashboard Menu',      icon:'fa-solid fa-puzzle-piece',     direct:false },
-    '/dashboard-menu/manage':        { section:'PRIVILEGES', header:'Dashboard Menu', page:'Manage Dashboard Menu',      icon:'fa-solid fa-puzzle-piece',     direct:false },
-    '/page-privilege/create':        { section:'PRIVILEGES', header:'Page Privilege', page:'Create Page Privilege',      icon:'fa-solid fa-shield-halved',    direct:false },
-    '/page-privilege/manage':        { section:'PRIVILEGES', header:'Page Privilege', page:'Manage Page Privilege',      icon:'fa-solid fa-shield-halved',    direct:false },
-    '/role-privileges/manage':       { section:'PRIVILEGES', header:'Page Privilege', page:'Assign Role Privilege',      icon:'fa-solid fa-shield-halved',    direct:false },
-
-    '/activity-logs':                { section:'OPERATIONS', header:'Operations',     page:'Activity Logs',              icon:'fa-solid fa-clock-rotate-left', direct:true  },
-    '/mailers/manage':               { section:'OPERATIONS', header:'Settings',       page:'Mailer',                     icon:'fa-solid fa-gear',             direct:false },
+    '/user/manage':            { section:'WORKFORCE',      header:'Workforce',      page:'Manage Users',             icon:'fa-solid fa-user-group',       direct:true  },
+    '/users/manage':           { section:'WORKFORCE',      header:'Workforce',      page:'Manage Users',             icon:'fa-solid fa-user-group',       direct:true  },
+    '/profile':                { section:'SELF SERVICE',   header:'Self Service',   page:'Profile',                  icon:'fa-solid fa-user',             direct:true  },
+    '/dashboard-menu/create':  { section:'ACCESS CONTROL', header:'Dashboard Menu', page:'Create Dashboard Menu',    icon:'fa-solid fa-puzzle-piece',     direct:false },
+    '/dashboard-menu/manage':  { section:'ACCESS CONTROL', header:'Dashboard Menu', page:'Manage Dashboard Menu',    icon:'fa-solid fa-puzzle-piece',     direct:false },
+    '/page-privilege/create':  { section:'ACCESS CONTROL', header:'Page Privilege', page:'Create Page Privilege',    icon:'fa-solid fa-key',              direct:false },
+    '/page-privilege/manage':  { section:'ACCESS CONTROL', header:'Page Privilege', page:'Manage Page Privilege',    icon:'fa-solid fa-lock',             direct:false },
+    '/role-privileges/manage': { section:'ACCESS CONTROL', header:'Role Privilege', page:'Assign Role Privilege',    icon:'fa-solid fa-user-shield',      direct:true  },
+    '/user-privileges/manage': { section:'ACCESS CONTROL', header:'User Privilege', page:'Assign User Privilege',    icon:'fa-solid fa-user-lock',        direct:true  },
+    '/activity-logs':          { section:'OPERATIONS',     header:'Operations',     page:'Activity Logs',            icon:'fa-solid fa-clock-rotate-left',direct:true  },
+    '/notifications':          { section:'OPERATIONS',     header:'Operations',     page:'Notifications',            icon:'fa-solid fa-bell',             direct:true  },
   };
 
   const SECTION_ICONS = {
-    'HOSPITALS':  'fa-solid fa-hospital',
-    'ACADEMICS':  'fa-solid fa-graduation-cap',
-    'ACCOUNTING': 'fa-solid fa-calculator',
-    'USERS':      'fa-solid fa-users',
-    'CONTENT':    'fa-solid fa-file-lines',
-    'EXAMS':      'fa-solid fa-shield-halved',
-    'PRIVILEGES': 'fa-solid fa-screwdriver-wrench',
-    'OPERATIONS': 'fa-solid fa-gear',
-    'OTHER':      'fa-solid fa-folder'
+    'WORKFORCE':      'fa-solid fa-users-gear',
+    'SELF SERVICE':   'fa-solid fa-user',
+    'ACCESS CONTROL': 'fa-solid fa-shield-halved',
+    'OPERATIONS':     'fa-solid fa-gear',
+    'OTHER':          'fa-solid fa-folder'
   };
 
-  const SECTION_ORDER = ['HOSPITALS','ACADEMICS','ACCOUNTING','USERS','CONTENT','EXAMS','PRIVILEGES','OPERATIONS','OTHER'];
+  const SECTION_ORDER = ['WORKFORCE','SELF SERVICE','ACCESS CONTROL','OPERATIONS','OTHER'];
 
   function inferSectionFromName(name){
     const n = safeText(name).toLowerCase();
     if (!n) return 'OTHER';
-    if (/(hospital|clinic|medical center|medical centre|nursing home)/.test(n)) return 'HOSPITALS';
-    if (/(campus|institution|course|section|intake|subject|routine|faculty|affiliation|syllabus|study material|academic)/.test(n)) return 'ACADEMICS';
-    if (/(account|fees|scholarship|finance)/.test(n)) return 'ACCOUNTING';
-    if (/(user|student|people|faculty|staff)/.test(n)) return 'USERS';
-    if (/(notice|content|page|banner|media|gallery|assignment)/.test(n)) return 'CONTENT';
-    if (/(quiz|exam|result|test)/.test(n)) return 'EXAMS';
-    if (/(privilege|dashboard menu|role privilege)/.test(n)) return 'PRIVILEGES';
-    if (/(setting|mailer|operation|config)/.test(n)) return 'OPERATIONS';
+    if (/(user|employee|staff|workforce|team|people|hr)/.test(n)) return 'WORKFORCE';
+    if (/(profile|self service|account)/.test(n)) return 'SELF SERVICE';
+    if (/(privilege|dashboard menu|role privilege|user privilege|access)/.test(n)) return 'ACCESS CONTROL';
+    if (/(notification|log|setting|operation|config)/.test(n)) return 'OPERATIONS';
     return 'OTHER';
   }
 
@@ -1753,39 +1612,6 @@ document.addEventListener('DOMContentLoaded', () => {
         icon: safeText(page?.icon_class || header?.icon_class || matched.icon || ''),
         direct: !!matched.direct,
         href: path || safeText(page?.href || ''),
-      };
-    }
-
-    if (/^\/exam\/results\/[^/]+\/view$/.test(path)) {
-      return {
-        section: 'EXAMS',
-        headerName: 'Quiz',
-        pageName: 'Result Details',
-        icon: 'fa-solid fa-square-poll-vertical',
-        direct: false,
-        href: path,
-      };
-    }
-
-    if (/^\/exam\/[^/]+$/.test(path)) {
-      return {
-        section: 'EXAMS',
-        headerName: 'Quiz',
-        pageName: 'Take Exam',
-        icon: 'fa-solid fa-file-pen',
-        direct: false,
-        href: path,
-      };
-    }
-
-    if (/^\/doctor\/profile\/[^/]+$/.test(path)) {
-      return {
-        section: 'HOSPITALS',
-        headerName: 'Doctors',
-        pageName: 'Doctor Profile',
-        icon: 'fa-solid fa-user-doctor',
-        direct: true,
-        href: path,
       };
     }
 
@@ -1967,13 +1793,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const confirm = await Swal.fire({
       title: 'Log out?',
-      text: 'You will be signed out of Doctor Booking.',
+      text: 'You will be signed out of Attendance System.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, logout',
       cancelButtonText: 'Cancel',
       focusCancel: true,
-      confirmButtonColor: '#9E363A'
+      confirmButtonColor: '#0f766e'
     });
 
     if (!confirm.isConfirmed) return;
@@ -2018,6 +1844,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeNavEl = null;
 
     try{
+      if (getBearerToken()) {
+        alertsMenu?.classList.remove('d-none');
+        notificationDrawer?.classList.remove('d-none');
+      }
+
       bindSubmenuToggles(document);
       restoreOpenMenus(document);
 

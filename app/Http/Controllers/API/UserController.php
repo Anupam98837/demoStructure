@@ -21,14 +21,13 @@ class UserController extends Controller
     private const USER_TYPE = 'App\\Models\\User';
 
     /** Canonical roles */
-    private const ROLES = ['patient', 'doctor', 'admin', 'author'];
+    private const ROLES = ['admin', 'hr', 'employee'];
 
     /** Short codes for roles */
     private const ROLE_SHORT = [
-        'patient' => 'PAT',
-        'doctor'  => 'DOC',
-        'admin'   => 'ADM',
-        'author'  => 'AUT',
+        'admin'    => 'ADM',
+        'hr'       => 'HR',
+        'employee' => 'EMP',
     ];
 
     /* =========================================================
@@ -228,33 +227,22 @@ class UserController extends Controller
     }
 
     /**
-     * POST /api/auth/patient-register
+     * POST /api/auth/register
      */
-    public function patientRegister(Request $request)
+    public function register(Request $request)
     {
-        return $this->registerPatient($request);
+        return $this->registerEmployee($request);
     }
 
-    /**
-     * Backward-compatible alias if old routes still call studentRegister.
-     */
-    public function studentRegister(Request $request)
+    protected function registerEmployee(Request $request)
     {
-        return $this->registerPatient($request);
-    }
-
-    protected function registerPatient(Request $request)
-    {
-        Log::info('[Patient Register] begin', ['ip' => $request->ip()]);
+        Log::info('[Register] begin', ['ip' => $request->ip()]);
 
         $rules = [
             'name'         => 'required|string|max:255',
             'email'        => 'required|email|max:255',
             'phone_number' => 'required|string|max:32',
             'source'       => 'nullable|string|max:100',
-            'doctor_slug'  => 'nullable|string|max:190',
-            'doctor_uuid'  => 'nullable|string|max:64',
-            'doctor_name'  => 'nullable|string|max:255',
         ];
 
         if ($request->filled('password') || $request->filled('password_confirmation')) {
@@ -269,8 +257,8 @@ class UserController extends Controller
         if ($v->fails()) {
             $this->logActivity(
                 activity: 'store_failed',
-                title: 'Patient registration failed - validation error',
-                description: 'Patient registration failed due to validation errors.',
+                title: 'Registration failed - validation error',
+                description: 'Account registration failed due to validation errors.',
                 performedBy: 0,
                 performedByName: null,
                 targetId: null,
@@ -280,7 +268,7 @@ class UserController extends Controller
                     'phone_number' => $request->input('phone_number'),
                     'errors'       => $v->errors()->toArray(),
                     'reason'       => 'validation_error',
-                    'role'         => 'patient',
+                    'role'         => 'employee',
                 ],
                 request: $request
             );
@@ -313,30 +301,20 @@ class UserController extends Controller
         } while (DB::table('users')->where('uuid', $uuid)->exists());
 
         $name = trim((string) $data['name']);
-        $base = Str::slug($name ?: 'patient');
+        $base = Str::slug($name ?: 'employee');
 
         do {
             $slug = $base . '-' . Str::lower(Str::random(24));
         } while (DB::table('users')->where('slug', $slug)->exists());
 
-        [$role, $roleShort] = $this->normalizeRole('patient', null);
+        [$role, $roleShort] = $this->normalizeRole($data['role'] ?? 'employee', null);
 
         $now = now();
         $metadata = [
             'timezone' => 'Asia/Kolkata',
-            'source'   => (string) ($data['source'] ?? 'patient_register_api'),
+            'source'   => (string) ($data['source'] ?? 'employee_register_api'),
         ];
-        $successMessage = Str::contains((string) $metadata['source'], ['auth_register', 'account_register'])
-            ? 'Account created successfully'
-            : 'Patient registered successfully';
-
-        if (!empty($data['doctor_slug']) || !empty($data['doctor_uuid']) || !empty($data['doctor_name'])) {
-            $metadata['booking_context'] = array_filter([
-                'doctor_slug' => (string) ($data['doctor_slug'] ?? ''),
-                'doctor_uuid' => (string) ($data['doctor_uuid'] ?? ''),
-                'doctor_name' => (string) ($data['doctor_name'] ?? ''),
-            ], fn ($value) => $value !== '');
-        }
+        $successMessage = 'Account created successfully';
 
         try {
             DB::table('users')->insert([
@@ -363,8 +341,8 @@ class UserController extends Controller
 
             $this->logActivity(
                 activity: 'store',
-                title: 'Patient registration successful',
-                description: 'A new patient account was registered successfully.',
+                title: 'Registration successful',
+                description: 'A new account was registered successfully.',
                 performedBy: (int) $user->id,
                 performedByName: $user->name ?? null,
                 targetId: $user->id,
@@ -380,10 +358,10 @@ class UserController extends Controller
             );
 
             $this->notifyAdmins(
-                'Patient registered',
+                'Employee account registered',
                 ($user->name ?? $name) . ' registered successfully.',
                 [
-                    'action' => 'patient_registered',
+                    'action' => 'employee_registered',
                     'module' => 'users',
                     'user'   => [
                         'id'    => (int) $user->id,
@@ -406,11 +384,11 @@ class UserController extends Controller
                 'user'         => $this->publicUserPayload($user),
             ], 201);
         } catch (\Throwable $e) {
-            Log::error('[Patient Register] failed', ['error' => $e->getMessage()]);
+            Log::error('[Register] failed', ['error' => $e->getMessage()]);
 
             return response()->json([
                 'status'  => 'error',
-                'message' => 'Patient registration failed',
+                'message' => 'Account registration failed',
             ], 500);
         }
     }
@@ -601,7 +579,7 @@ class UserController extends Controller
         } while (DB::table('users')->where('slug', $slug)->exists());
 
         [$role, $roleShort] = $this->normalizeRole(
-            $data['role'] ?? 'patient',
+            $data['role'] ?? 'employee',
             $data['role_short_form'] ?? null
         );
 
@@ -1509,8 +1487,8 @@ class UserController extends Controller
 
         $file = $request->file('file');
 
-        $defaultPassword = (string) ($request->input('default_password') ?: 'Patient@123');
-        $defaultRoleIn   = (string) ($request->input('default_role') ?: 'patient');
+        $defaultPassword = (string) ($request->input('default_password') ?: 'Employee@123');
+        $defaultRoleIn   = (string) ($request->input('default_role') ?: 'employee');
         [$defaultRole, $defaultRoleShort] = $this->normalizeRole($defaultRoleIn, null);
 
         $path = $file->getRealPath();
@@ -2160,65 +2138,41 @@ class UserController extends Controller
             ->toString();
 
         $map = [
-            // admin
-            'admin'                 => 'admin',
-            'administrator'         => 'admin',
-            'adm'                   => 'admin',
-            'super admin'           => 'admin',
-            'superadmin'            => 'admin',
-            'super administrator'   => 'admin',
-            'sa'                    => 'admin',
-            'college administrator' => 'admin',
-            'college admin'         => 'admin',
-            'collegeadmin'          => 'admin',
-            'coladmin'              => 'admin',
-            'cadm'                  => 'admin',
+            'admin'             => 'admin',
+            'administrator'     => 'admin',
+            'adm'               => 'admin',
+            'super admin'       => 'admin',
+            'superadmin'        => 'admin',
 
-            // doctor
-            'doctor'               => 'doctor',
-            'doctors'              => 'doctor',
-            'physician'            => 'doctor',
-            'dr'                   => 'doctor',
-            'doc'                  => 'doctor',
-            'examiner'             => 'doctor',
-            'invigilator'          => 'doctor',
-            'proctor'              => 'doctor',
-            'exam controller'      => 'doctor',
-            'exam admin'           => 'doctor',
-            'exm'                  => 'doctor',
-            'academic counsellor'  => 'doctor',
-            'academic counselor'   => 'doctor',
-            'academic advisor'     => 'doctor',
-            'academic adviser'     => 'doctor',
-            'acc'                  => 'doctor',
+            'hr'                => 'hr',
+            'human resources'   => 'hr',
+            'human resource'    => 'hr',
+            'hr manager'        => 'hr',
+            'people ops'        => 'hr',
+            'people operations' => 'hr',
+            'recruiter'         => 'hr',
 
-            // patient
-            'patient'   => 'patient',
-            'patients'  => 'patient',
-            'student'   => 'patient',
-            'students'  => 'patient',
-            'candidate' => 'patient',
-            'learner'   => 'patient',
-            'pat'       => 'patient',
-            'std'       => 'patient',
-            'stu'       => 'patient',
-
-            // author
-            'author'         => 'author',
-            'writer'         => 'author',
-            'content writer' => 'author',
-            'contentwriter'  => 'author',
-            'editor'         => 'author',
-            'aut'            => 'author',
+            'employee'          => 'employee',
+            'staff'             => 'employee',
+            'team member'       => 'employee',
+            'associate'         => 'employee',
+            'executive'         => 'employee',
+            'manager'           => 'employee',
+            'supervisor'        => 'employee',
+            'officer'           => 'employee',
+            'member'            => 'employee',
+            'emp'               => 'employee',
+            'staff member'      => 'employee',
+            'user'              => 'employee',
         ];
 
         $r = $map[$key] ?? $key;
 
         if (!in_array($r, self::ROLES, true)) {
-            $r = 'patient';
+            $r = 'employee';
         }
 
-        $short = $short ?: (self::ROLE_SHORT[$r] ?? 'PAT');
+        $short = $short ?: (self::ROLE_SHORT[$r] ?? 'EMP');
 
         return [$r, strtoupper($short)];
     }

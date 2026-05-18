@@ -41,7 +41,7 @@ class AdminUserSeeder extends Seeder
                     'created_at_ip' => '127.0.0.1',
                     'metadata' => json_encode([
                         'seeded' => true,
-                        'type' => 'super admin',
+                        'type' => 'system admin',
                     ]),
                     'updated_at' => now(),
                 ]);
@@ -75,7 +75,7 @@ class AdminUserSeeder extends Seeder
             'deleted_at' => null,
             'metadata' => json_encode([
                 'seeded' => true,
-                'type' => 'super admin',
+                'type' => 'system admin',
             ]),
         ]);
     }

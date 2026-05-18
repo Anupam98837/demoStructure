@@ -128,7 +128,7 @@ class UserPrivilegeController extends Controller
     private function canViewUserModules(array $actor, int $targetUserId): bool
     {
         if ($actor['id'] === $targetUserId) return true;
-        return in_array($actor['role'], ['admin', 'super_admin'], true);
+        return $actor['role'] === 'admin';
     }
 
     /* ============================================================
@@ -1431,8 +1431,7 @@ class UserPrivilegeController extends Controller
         'type' => 'App\\Models\\User',
     ];
 
-    // ✅ If admin-like role => return "all"
-    if (in_array(strtolower(trim((string) ($actor['role'] ?? ''))), ['admin', 'super_admin', 'director', 'principal'], true)) {
+    if (strtolower(trim((string) ($actor['role'] ?? ''))) === 'admin') {
         return response()->json([
             'user_uuid'       => $this->getUserUuid((int) $actor['id']),
             'session_expired' => false,

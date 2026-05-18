@@ -449,10 +449,9 @@
             <label class="form-label">Role</label>
             <select id="modal_role" class="form-select">
               <option value="">All Roles</option>
-              <option value="patient">Patient</option>
-              <option value="doctor">Doctor</option>
               <option value="admin">Admin</option>
-              <option value="author">Author</option>
+              <option value="hr">HR</option>
+              <option value="employee">Employee</option>
             </select>
           </div>
 
@@ -607,10 +606,9 @@
             <label class="form-label">Role <span class="text-danger">*</span></label>
             <select class="form-select" id="userRole" required>
               <option value="">Select Role</option>
-              <option value="patient">Patient</option>
-              <option value="doctor">Doctor</option>
               <option value="admin">Admin</option>
-              <option value="author">Author</option>
+              <option value="hr">HR</option>
+              <option value="employee">Employee</option>
             </select>
           </div>
 
@@ -971,21 +969,19 @@ document.addEventListener('DOMContentLoaded', function(){
     r = r.replace(/[\s-]+/g, '_');
 
     const map = {
-      superadmin: 'admin',
-      super_admin: 'admin',
       administrator: 'admin',
-      student: 'patient',
-      students: 'patient',
-      examiner: 'doctor',
-      academic_counsellor: 'doctor',
-      academiccounsellor: 'doctor',
-      academiccounselor: 'doctor',
-      college_administrator: 'admin',
-      collegeadministrator: 'admin',
-      writer: 'author',
-      physician: 'doctor',
-      dr: 'doctor',
-      doc: 'doctor',
+      human_resources: 'hr',
+      human_resource: 'hr',
+      people_ops: 'hr',
+      recruiter: 'hr',
+      staff: 'employee',
+      team_member: 'employee',
+      associate: 'employee',
+      executive: 'employee',
+      manager: 'employee',
+      supervisor: 'employee',
+      member: 'employee',
+      user: 'employee',
     };
 
     return map[r] || r;
@@ -993,10 +989,9 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function roleLabel(role){
     const map = {
-      patient: 'Patient',
-      doctor: 'Doctor',
       admin: 'Admin',
-      author: 'Author',
+      hr: 'HR',
+      employee: 'Employee',
     };
     return map[normalizeRoleToken(role)] || (role ? String(role) : '—');
   }
@@ -1027,10 +1022,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function buildFloatingMenuHtml(user){
     const items = [];
-
-    if (user && user.uuid && state.canView){
-      items.push('<button type="button" class="usr-menu-item" data-action="doctor_profile"><i class="fa fa-user-doctor"></i><span>Doctor Profile</span></button>');
-    }
 
     if (state.canAssignPrivileges){
       items.push('<button type="button" class="usr-menu-item" data-action="assign_privilege"><i class="fa fa-key"></i><span>Assign Privilege</span></button>');
@@ -1534,8 +1525,8 @@ document.addEventListener('DOMContentLoaded', function(){
   function downloadCsvTemplate(){
     const content = [
       'name,email,password,role,phone_number,alternative_email,alternative_phone_number,whatsapp_number,address',
-      'John Doe,john@example.com,Patient@123,patient,,9876543210,,,,Kolkata',
-      'Dr Smith,doctor@example.com,Doctor@123,doctor,,9123456780,,,,Mumbai',
+      'Aarav Sen,aarav@example.com,Employee@123,employee,,9876543210,,,,Kolkata',
+      'Riya Sharma,riya@example.com,HrTeam@123,hr,,9123456780,,,,Mumbai',
     ].join('\n');
 
     const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
@@ -1857,11 +1848,6 @@ document.addEventListener('DOMContentLoaded', function(){
         if (userUuid) query.set('user_uuid', userUuid);
         if (userId) query.set('user_id', userId);
         window.location.href = '/user-privileges/manage?' + query.toString();
-        return;
-      }
-
-      if (action === 'doctor_profile'){
-        window.location.href = '/doctor/profile/' + encodeURIComponent(userUuid || userId);
         return;
       }
 
